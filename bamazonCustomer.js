@@ -14,7 +14,7 @@ function connect() {
 		if (err) throw err;
 		console.log("connected as id " + connection.threadId);
 		queryProducts();
-		connection.end();
+		//connection.end();
 	});
 };
 
@@ -45,17 +45,22 @@ function userRequest() {
 			name: "itemquantity"
 		}
 	]).then(function(response) {
-		id = response.itemid;
-		console.log(id);
+		id = response.itemid;	
 		quantity = response.itemquantity;
-		connection.query("SELECT * FROM products;" /*WHERE item_id=?;", [id]*/, function(err, response) {
-			console.log(response);
+		connection.query("SELECT * FROM products WHERE item_id=?;", [id], function(err, response) {
+			if (err) throw err;
+			if (quantity <= response.stock_quantity) {
+				var updateQuantity = response.stock_quantity - quantity;
+				connection.query("UPDATE products SET stock_quantity=? WHERE item_id=?", [updateQuantity, id], function(err, res) {
+					if (err) throw err;
+					connection.end();
+				});
+			} else {
+				console.log("Insufficient quantity in stock!");
+				connection.end();
+			};
 		});
 	});
-
-	// connection.query("INSERT INTO (itemname, price) VALUES (?,?);", [name, price], function(err, res) {
-
-	// });
 };
 
 connect();
