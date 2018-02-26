@@ -49,8 +49,8 @@ function userRequest() {
 		quantity = response.itemquantity;
 		connection.query("SELECT * FROM products WHERE item_id=?;", [id], function(err, response) {
 			if (err) throw err;
-			if (quantity <= response.stock_quantity) {
-				var updateQuantity = response.stock_quantity - quantity;
+			if (quantity <= response[0].stock_quantity) {
+				var updateQuantity = response[0].stock_quantity - quantity;
 				connection.query("UPDATE products SET stock_quantity=? WHERE item_id=?", [updateQuantity, id], function(err, res) {
 					if (err) throw err;
 					connection.end();
